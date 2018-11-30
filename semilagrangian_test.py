@@ -1,5 +1,6 @@
-# V_4 - Semi-Lagrangian Scheme
+# V_5 - Semi-Lagrangian Scheme
 # To find the element of several coordinates
+# and outside coordinates
 
 # =======================
 # Importing the libraries
@@ -38,23 +39,65 @@ print ""
 
 #-----------------------------------------
 # varios pontos
-points1_x = np.zeros([3,1], dtype = float)
-points1_y = np.zeros([3,1], dtype = float)
+points1_x = np.zeros([9,1], dtype = float)
+points1_y = np.zeros([9,1], dtype = float)
 
-#217
-points1_x[0] = 5.9
-points1_y[0] = 0.3
+#node 0
+#204 elemento vizinho proximo do ponto 1
+points1_x[0] = 0.1
+points1_y[0] = 0.8
 
-#187
-points1_x[1] = 2.3
+#node 1
+#180 elemento vizinho distante do ponto 2
+points1_x[1] = 2.0
 points1_y[1] = 0.7
 
-#261
-points1_x[2] = 3.0
-points1_y[2] = 0.5
+#node 2
+#3 noh no contorno imovel
+points1_x[2] = 8.275
+points1_y[2] = 1.0
+
+#node 3
+#4 noh no vertice imovel
+points1_x[3] = 10.0
+points1_y[3] = 1.0
+
+#node 4
+#5 noh vizinho proximo do ponto 5 fora do dominio
+points1_x[4] = 10.1
+points1_y[4] = 0.1
+
+#node 5
+#7 noh vizinho distante do ponto 6 fora do dominio
+points1_x[5] = 0.5
+points1_y[5] = 1.1
+
+#node 6
+#36 noh vizinho mega distante do ponto 7 fora do dominio
+points1_x[6] = 8.4
+points1_y[6] = -0.1
+
+#node 7
+#228 elemento vizinho mega distante do ponto 8
+points1_x[7] = 9.2
+points1_y[7] = 0.7
+
+#node 8
+#317 elemento vizinho mega distante do ponto 9 colado no contorno
+points1_x[8] = 5.8
+points1_y[8] = 0.1
 
 
-for node in range(0,3): #range mesh.npoints
+
+'''
+#node
+node = 61
+x = 9.1
+y = 0.5
+'''
+
+
+for node in range(0,9): #range mesh.npoints
  x = float(points1_x[node])
  y = float(points1_y[node])
 
@@ -63,6 +106,8 @@ for node in range(0,3): #range mesh.npoints
  
  print node
 
+#length = []
+#ww = 1
  while ww == 1:
 #for i in range(0,3):
 
@@ -86,10 +131,11 @@ for node in range(0,3): #range mesh.npoints
    b = np.array([x,y,1.0])
 
    alpha = np.linalg.solve(A,b)
-   
+ 
    if np.all(alpha >= 0.0) and np.all(alpha <= 1.0):
     ee = e + 175
-    print ee 
+    print "elemento dominio %s" %ee
+    print "fazer interpolacao triangular" 
     ww = 0
     break
 
@@ -116,5 +162,18 @@ for node in range(0,3): #range mesh.npoints
    
     ww = 1
  
-  length_min = min(length, key=lambda k:k[1])
-  node = length_min[0]
+  if ww == 0:
+    break
+  
+  else:
+   length_min = min(length, key=lambda k:k[1])
+   node1 = node
+   node = length_min[0]
+
+   if node == node1 and ww == 1:
+    node = node + 1
+    print "elemento contorno proximo ao no %s" %node
+    print "fazer regra da alavanca"
+    ww = 0
+    break
+
