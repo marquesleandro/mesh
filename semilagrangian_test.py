@@ -1,6 +1,7 @@
-# V_5 - Semi-Lagrangian Scheme
+# V_6 - Semi-Lagrangian Scheme
 # To find the element of several coordinates
 # and outside coordinates
+# using neighbors elements
 
 # =======================
 # Importing the libraries
@@ -27,7 +28,7 @@ print '------------'
 
 start_time = time()
 
-name_mesh = 'semilagrangian_test.msh'
+name_mesh = 'malha_cavity.msh'
 number_equations = 3
 mesh = trimsh.Linear('/home/marquesleandro/mesh',name_mesh, number_equations)
 mesh.ien()
@@ -37,143 +38,117 @@ end_time = time()
 print 'time duration: %.1f seconds' %(end_time - start_time)
 print ""
 
+
 #-----------------------------------------
-# varios pontos
-points1_x = np.zeros([9,1], dtype = float)
-points1_y = np.zeros([9,1], dtype = float)
 
-#node 0
-#204 elemento vizinho proximo do ponto 1
-points1_x[0] = 0.1
-points1_y[0] = 0.8
+x_d = np.zeros([mesh.npoints,1], dtype = float)
+y_d = np.zeros([mesh.npoints,1], dtype = float)
 
-#node 1
-#180 elemento vizinho distante do ponto 2
-points1_x[1] = 2.0
-points1_y[1] = 0.7
+vx = np.zeros([mesh.npoints,1], dtype = float)
+vy = np.zeros([mesh.npoints,1], dtype = float)
 
-#node 2
-#3 noh no contorno imovel
-points1_x[2] = 8.275
-points1_y[2] = 1.0
+dt = 0.005
 
-#node 3
-#4 noh no vertice imovel
-points1_x[3] = 10.0
-points1_y[3] = 1.0
+for i in range(0,mesh.npoints):
+ vx[i] = np.sin(mesh.y[i])
+ vy[i] = 0.0
 
-#node 4
-#5 noh vizinho proximo do ponto 5 fora do dominio
-points1_x[4] = 10.1
-points1_y[4] = 0.1
+x_d = mesh.x
+y_d = mesh.y
 
-#node 5
-#7 noh vizinho distante do ponto 6 fora do dominio
-points1_x[5] = 0.5
-points1_y[5] = 1.1
+print '----------------'
+print 'SEMI-LAGRANGIAN:'
+print '----------------'
 
-#node 6
-#36 noh vizinho mega distante do ponto 7 fora do dominio
-points1_x[6] = 8.4
-points1_y[6] = -0.1
+start_time = time()
 
-#node 7
-#228 elemento vizinho mega distante do ponto 8
-points1_x[7] = 9.2
-points1_y[7] = 0.7
+nt = 300
+for t in tqdm(range(0,nt)):
+ save = InOut.Linear(x_d,y_d,mesh.IEN,mesh.npoints,mesh.nelem,vx,vx,vy,vx,vy)
+ save.saveVTK('/home/marquesleandro/result','semi_lagrangian%s' %t) 
 
-#node 8
-#317 elemento vizinho mega distante do ponto 9 colado no contorno
-points1_x[8] = 5.8
-points1_y[8] = 0.1
+ for node in range(0,mesh.npoints):
+  # mesh moving 
+  x_d[node] = x_d[node] + vx[node]*dt
+  y_d[node] = y_d[node] + vy[node]*dt
 
+  x = float(x_d[node])
+  y = float(y_d[node])
 
-
-'''
-#node
-node = 61
-x = 9.1
-y = 0.5
-'''
-
-
-for node in range(0,9): #range mesh.npoints
- x = float(points1_x[node])
- y = float(points1_y[node])
-
- length = []
- ww = 1
+  length = []
+  ww = 1
  
- print node
+  while ww == 1:
+   for e in mesh.neighbors_elements[node]:
+    v1 = mesh.IEN[e][0]
+    v2 = mesh.IEN[e][1]
+    v3 = mesh.IEN[e][2]
 
-#length = []
-#ww = 1
- while ww == 1:
-#for i in range(0,3):
+    x1 = float(mesh.x[v1])
+    x2 = float(mesh.x[v2])
+    x3 = float(mesh.x[v3])
 
-  for e in mesh.neighbors_elements[node]:
-   v1 = mesh.IEN[e][0]
-   v2 = mesh.IEN[e][1]
-   v3 = mesh.IEN[e][2]
-
-   x1 = float(mesh.x[v1])
-   x2 = float(mesh.x[v2])
-   x3 = float(mesh.x[v3])
-
-   y1 = float(mesh.y[v1])
-   y2 = float(mesh.y[v2])
-   y3 = float(mesh.y[v3])
+    y1 = float(mesh.y[v1])
+    y2 = float(mesh.y[v2])
+    y3 = float(mesh.y[v3])
   
-   A = np.array([[x1,x2,x3],
-                 [y1,y2,y3],
-                 [1.0,1.0,1.0]])
+    A = np.array([[x1,x2,x3],
+                  [y1,y2,y3],
+                  [1.0,1.0,1.0]])
 
-   b = np.array([x,y,1.0])
+    b = np.array([x,y,1.0])
 
-   alpha = np.linalg.solve(A,b)
+    alpha = np.linalg.solve(A,b)
  
-   if np.all(alpha >= 0.0) and np.all(alpha <= 1.0):
-    ee = e + 175
-    print "elemento dominio %s" %ee
-    print "fazer interpolacao triangular" 
-    ww = 0
-    break
+    if np.all(alpha >= 0.0) and np.all(alpha <= 1.0):
+     ee = e + 175
+     #print "elemento dominio %s" %ee
+     #print "fazer interpolacao triangular"
+     ww = 0
+     break
 
+    else:
+     x_a = x1 - x
+     x_b = x2 - x
+     x_c = x3 - x
+   
+     y_a = y1 - y
+     y_b = y2 - y
+     y_c = y3 - y
+ 
+     length1 = np.sqrt(x_a**2 + y_a**2)
+     length2 = np.sqrt(x_b**2 + y_b**2)
+     length3 = np.sqrt(x_c**2 + y_c**2)
+
+     a_1 = [v1,length1]
+     a_2 = [v2,length2]
+     a_3 = [v3,length3]
+ 
+     length.append(a_1)
+     length.append(a_2)
+     length.append(a_3)
+   
+     ww = 1
+ 
+   # first neighbor is element found
+   if ww == 0:
+    break
+ 
+   # coordinate doesn't found
    else:
-    x_a = x1 - x
-    x_b = x2 - x
-    x_c = x3 - x
-   
-    y_a = y1 - y
-    y_b = y2 - y
-    y_c = y3 - y
- 
-    length1 = np.sqrt(x_a**2 + y_a**2)
-    length2 = np.sqrt(x_b**2 + y_b**2)
-    length3 = np.sqrt(x_c**2 + y_c**2)
+    length_min = min(length, key=lambda k:k[1])
+    node1 = node
+    node = length_min[0]
 
-    a_1 = [v1,length1]
-    a_2 = [v2,length2]
-    a_3 = [v3,length3]
- 
-    length.append(a_1)
-    length.append(a_2)
-    length.append(a_3)
-   
-    ww = 1
- 
-  if ww == 0:
-    break
-  
-  else:
-   length_min = min(length, key=lambda k:k[1])
-   node1 = node
-   node = length_min[0]
+    # outside domain
+    if node == node1 and ww == 1:
+     #node = node + 1
+     #print "elemento contorno proximo ao no %s" %node
+     #print "fazer regra da alavanca"    
+     ww = 0
+     break
 
-   if node == node1 and ww == 1:
-    node = node + 1
-    print "elemento contorno proximo ao no %s" %node
-    print "fazer regra da alavanca"
-    ww = 0
-    break
+end_time = time()
+print 'time duration: %.1f seconds' %(end_time - start_time)
+print ""
 
