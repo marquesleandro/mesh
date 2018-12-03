@@ -1,3 +1,7 @@
+# V_2 - Semi-Lagrangian Scheme
+# To find the element of several coordinates
+# and outside coordinates with once time solve
+
 # =======================
 # Importing the libraries
 # =======================
@@ -25,7 +29,7 @@ start_time = time()
 
 name_mesh = 'semilagrangian_test.msh'
 number_equations = 3
-mesh = trimsh.Linear('/home/marquesleandro/fem/mesh',name_mesh, number_equations)
+mesh = trimsh.Linear('/home/marquesleandro/mesh',name_mesh, number_equations)
 mesh.ien()
 mesh.coord()
 
@@ -33,106 +37,158 @@ end_time = time()
 print 'time duration: %.1f seconds' %(end_time - start_time)
 print ""
 
+#-----------------------------------------
 
-points1_x = np.zeros([3,1], dtype = float)
-points1_y = np.zeros([3,1], dtype = float)
+print '----------------'
+print 'SEMI-LAGRANGIAN:'
+print '----------------'
 
-#200
-points1_x[0] = 0.5
-points1_y[0] = 0.4
+start_time = time()
 
-#187
-points1_x[1] = 2.2
+
+
+# varios pontos
+points1_x = np.zeros([9,1], dtype = float)
+points1_y = np.zeros([9,1], dtype = float)
+
+#node 0
+#204 elemento vizinho proximo do ponto 1
+points1_x[0] = 0.1
+points1_y[0] = 0.8
+
+#node 1
+#180 elemento vizinho distante do ponto 2
+points1_x[1] = 2.0
 points1_y[1] = 0.7
 
-#261
-points1_x[2] = 3.0
-points1_y[2] = 0.5
+#node 2
+#3 noh no contorno imovel
+points1_x[2] = 8.275
+points1_y[2] = 1.0
 
-# node 62
-node = 62
-x = 1.9
+#node 3
+#4 noh no vertice imovel
+points1_x[3] = 10.0
+points1_y[3] = 1.0
+
+#node 4
+#5 noh vizinho proximo do ponto 5 fora do dominio
+points1_x[4] = 10.1
+points1_y[4] = 0.1
+
+#node 5
+#7 noh vizinho distante do ponto 6 fora do dominio
+points1_x[5] = 0.5
+points1_y[5] = 1.1
+
+#node 6
+#36 noh vizinho mega distante do ponto 7 fora do dominio
+points1_x[6] = 8.4
+points1_y[6] = -0.1
+
+#node 7
+#228 elemento vizinho mega distante do ponto 8
+points1_x[7] = 9.2
+points1_y[7] = 0.7
+
+#node 8
+#317 elemento vizinho mega distante do ponto 9 colado no contorno
+points1_x[8] = 5.8
+points1_y[8] = 0.1
+
+
+
+'''
+#node
+node = 61
+x = 9.1
 y = 0.5
+'''
 
 
-element_avg = []
+for node in range(0,9): #range mesh.npoints
+ x = float(points1_x[node])
+ y = float(points1_y[node])
 
-barycenter = np.array([10.0,10.0,10.0])
-ww = 1
-
-while ww == 1:
- for e in mesh.neighbors_elements[node]:
-  v1 = mesh.IEN[e][0]
-  v2 = mesh.IEN[e][1]
-  v3 = mesh.IEN[e][2]
-
-  x1 = float(mesh.x[v1])
-  x2 = float(mesh.x[v2])
-  x3 = float(mesh.x[v3])
-
-  y1 = float(mesh.y[v1])
-  y2 = float(mesh.y[v2])
-  y3 = float(mesh.y[v3])
-  
-#  x = float(points1_x[i])
-#  y = float(points1_y[i])
-
-  A = np.array([[x1,x2,x3],
-                [y1,y2,y3],
-                [1.0,1.0,1.0]])
-
-  b = np.array([x,y,1.0])
-
-  alpha = np.linalg.solve(A,b)
-
-  barycenter = ((barycenter,alpha))
-
-  avg = np.average(np.sqrt(alpha**2))
-  aa2 = [e, avg]
-  element_avg.append(aa2) 
-
- near_element = min(element_avg, key=lambda k:k[1])
- near_element = near_element[0]
-  
- v1 = mesh.IEN[near_element][0]
- v2 = mesh.IEN[near_element][1]
- v3 = mesh.IEN[near_element][2]
-
- x1 = float(mesh.x[v1])
- x2 = float(mesh.x[v2])
- x3 = float(mesh.x[v3])
-
- y1 = float(mesh.y[v1])
- y2 = float(mesh.y[v2])
- y3 = float(mesh.y[v3])
-  
- x_a = x1 - x
- x_b = x2 - x
- x_c = x3 - x
-  
- y_a = y1 - x
- y_b = y2 - x
- y_c = y3 - x
+ length = []
+ ww = 1
  
- length1 = np.sqrt(x_a**2 + y_a**2)
- length2 = np.sqrt(x_b**2 + y_b**2)
- length3 = np.sqrt(x_c**2 + y_c**2)
-
- lenght = [[v1,length1],[v2,length2],[v3,length3]]
- lenght_min = min(lenght, key=lambda k:k[1])
- node = lenght_min[0]
  print node
- print element_avg
 
- for i in range(0,len(barycenter)):
-  if np.all(barycenter[i] >= 0.0) and np.all(barycenter[i] <= 1.0):
-   ee = e + 175
-   print ee
-   ww = 0
+#length = []
+#ww = 1
+ while ww == 1:
+#for i in range(0,3):
+
+  for e in mesh.neighbors_elements[node]:
+   v1 = mesh.IEN[e][0]
+   v2 = mesh.IEN[e][1]
+   v3 = mesh.IEN[e][2]
+
+   x1 = float(mesh.x[v1])
+   x2 = float(mesh.x[v2])
+   x3 = float(mesh.x[v3])
+
+   y1 = float(mesh.y[v1])
+   y2 = float(mesh.y[v2])
+   y3 = float(mesh.y[v3])
+  
+   A = np.array([[x1,x2,x3],
+                 [y1,y2,y3],
+                 [1.0,1.0,1.0]])
+
+   b = np.array([x,y,1.0])
+
+   alpha = np.linalg.solve(A,b)
  
-  else:
-   ww = 1
+   if np.all(alpha >= 0.0) and np.all(alpha <= 1.0):
+    ee = e + 175
+    print "elemento dominio %s" %ee
+    print "fazer interpolacao triangular" 
+    ww = 0
+    break
 
- element_avg = []
- barycenter = np.array([10.0,10.0,10.0])
- print element_avg
+   else:
+    x_a = x1 - x
+    x_b = x2 - x
+    x_c = x3 - x
+   
+    y_a = y1 - y
+    y_b = y2 - y
+    y_c = y3 - y
+ 
+    length1 = np.sqrt(x_a**2 + y_a**2)
+    length2 = np.sqrt(x_b**2 + y_b**2)
+    length3 = np.sqrt(x_c**2 + y_c**2)
+
+    a_1 = [v1,length1]
+    a_2 = [v2,length2]
+    a_3 = [v3,length3]
+ 
+    length.append(a_1)
+    length.append(a_2)
+    length.append(a_3)
+   
+    ww = 1
+ 
+  if ww == 0:
+    break
+  
+  else:
+   length_min = min(length, key=lambda k:k[1])
+   node1 = node
+   node = length_min[0]
+
+   if node == node1 and ww == 1:
+    node = node + 1
+    print "elemento contorno proximo ao no %s" %node
+    print "fazer regra da alavanca"
+    ww = 0
+    break
+
+end_time = time()
+print ""
+print 'time duration: %.1f seconds' %(end_time - start_time)
+print ""
+
+
