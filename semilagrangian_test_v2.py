@@ -102,8 +102,6 @@ for node in range(0,9): #range mesh.npoints
  x = float(points1_x[node])
  y = float(points1_y[node])
 
- ii = 0
- IEN_neighbors = np.zeros([len(mesh.neighbors_elements),3], dtype = float)
  length = []
  ww = 1
  print ""
@@ -114,9 +112,6 @@ for node in range(0,9): #range mesh.npoints
    v1 = mesh.IEN[e][0]
    v2 = mesh.IEN[e][1]
    v3 = mesh.IEN[e][2]
-
-   IEN_neighbors[ii] = [v1,v2,v3]
-   ii = ii + 1
 
    x1 = float(mesh.x[v1])
    x2 = float(mesh.x[v2])
