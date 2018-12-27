@@ -12,7 +12,7 @@ $PhysicalNames
 1 7 "dirichlet2 inflow"
 1 8 "dirichlet2 noslip bottom"
 1 9 "dirichlet3 bottom"
-1 10 "neumann3 outflow"
+1 10 "dirichlet3 outflow"
 1 11 "dirichlet3 inflow"
 1 12 "dirichlet3 top"
 $EndPhysicalNames
