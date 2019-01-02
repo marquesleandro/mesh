@@ -13,10 +13,7 @@ import numpy as np
 import scipy.sparse as sps
 import scipy.sparse.linalg
 import scipy.linalg
-import trimsh
-import trielem
-from tricond import b_bc
-import InOut
+import import_msh
 from tqdm import tqdm
 from time import time
 
@@ -29,7 +26,7 @@ start_time = time()
 
 name_mesh = 'semilagrangian_test2.msh'
 number_equations = 1
-mesh = trimsh.Linear('/home/marquesleandro/mesh',name_mesh, number_equations)
+mesh = import_msh.Linear('/home/marquesleandro/mesh',name_mesh, number_equations)
 mesh.ien()
 mesh.coord()
 
@@ -98,10 +95,11 @@ points1_y[8] = 0.15
 
 
 
-for node in range(0,9): #range mesh.npoints
- x = float(points1_x[node])
- y = float(points1_y[node])
+for i in range(0,9): #range mesh.npoints
+ x = float(points1_x[i])
+ y = float(points1_y[i])
 
+ node = i
  length = []
  ww = 1
  print ""
