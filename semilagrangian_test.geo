@@ -1,40 +1,22 @@
-// Gmsh project created on Wed Dec 21 22:42:40 2016
-
-lc = DefineNumber[ 0.02, Name "Parameters/lc" ]; 
-
-// removing 1.0 from y coordinate for symmetry, since 
-// normalV should be at Y=0.0 and everything else above. 
-// This number makes the average channel diameter equal to 1.
-xMax = 10.0000;
-symY = 1.0;
-Point(1)={0.000000,symY-0,0,lc}; 
-Point(2)={1.725,symY-0,0,lc}; 
-Point(3)={8.275,symY-0,0,lc}; 
-Point(4)={xMax,symY-0,0,lc}; 
-Point(5)={xMax,symY-1,0,lc}; 
-Point(6)={0,symY-1,0,lc}; 
-
-Line(1)={1,2}; 
-Line(2)={2,3}; 
-Line(3)={3,4}; 
-Line(4)={4,5}; 
-Line(5)={5,6}; 
-Line(6)={6,1}; 
-
-Line Loop(11) = {3, 4, 5, 6, 1, 2};
-Plane Surface(11) = {11};
-
-Physical Line("dirichlet1 moving wall top") = {1,2,3};
-Physical Line("neumann1 outflow") = {4};
-Physical Line("neumann1 inflow") = {6};
-Physical Line("dirichlet1 moving wall bottom") = {5};
-Physical Line("dirichlet2 moving wall top") = {1,2,3};
-Physical Line("neumann2 outflow") = {4};
-Physical Line("dirichlet2 inflow") = {6};
-Physical Line("dirichlet2 moving wall bottom") = {5};
-Physical Line("dirichlet3 bottom") = {5};
-Physical Line("neumann3 outflow") = {4};
-Physical Line("neumann3 inflow") = {6};
-Physical Line("dirichlet3 top") = {1,2,3};
-
-Physical Surface(11) = {11};
+cl__1 = 1;
+Point(1) = {0.25, 1, 0, 1};
+Point(2) = {0.25, 0.5, 0, 1};
+Point(3) = {1, 0.5, 0, 1};
+Point(4) = {1, 0, 0, 1};
+Point(5) = {0, 0, 0, 1};
+Point(6) = {0, 1, 0, 1};
+Line(1) = {1, 2};
+Line(2) = {2, 3};
+Line(3) = {3, 4};
+Line(4) = {4, 5};
+Line(5) = {5, 6};
+Line(6) = {6, 1};
+Line Loop(14) = {6, 1, 2, 3, 4, 5};
+Plane Surface(14) = {14};
+Physical Line("dirichlet1 line1") = {1};
+Physical Line("dirichlet1 line2") = {2};
+Physical Line("dirichlet1 line3") = {3};
+Physical Line("dirichlet1 line4") = {4};
+Physical Line("dirichlet1 line5") = {5};
+Physical Line("dirichlet1 line6") = {6};
+Physical Surface(15) = {14};
